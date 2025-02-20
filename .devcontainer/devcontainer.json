@@ -1,0 +1,19 @@
+{
+    "name": "Test Generator Development",
+    "image": "mcr.microsoft.com/devcontainers/universal:latest",
+    "hostRequirements": {
+        "memory": "16gb"  // Ensure enough memory for CodeLlama
+    },
+    "features": {
+        "docker-in-docker": "latest"
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "./testcase-generator-1.0.0.vsix"
+            ]
+        }
+    },
+    "postCreateCommand": "docker rm -f ollama 2>/dev/null || true && docker run -d -v ollama:/root/.ollama -p 11434:11434 --name ollama ollama/ollama && sleep 10 && docker exec -it ollama ollama pull codellama",
+    "postStartCommand": "docker start ollama || (docker rm -f ollama 2>/dev/null && docker run -d -v ollama:/root/.ollama -p 11434:11434 --name ollama ollama/ollama)"
+}
