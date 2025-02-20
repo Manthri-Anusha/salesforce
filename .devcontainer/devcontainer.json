@@ -10,7 +10,7 @@
     "customizations": {
         "vscode": {
             "extensions": [
-                "./testcase-generator-1.0.0.vsix"
+                "/workspaces/salesforce/.devcontainer/testcase-generator-1.0.0.vsix"
             ]
         }
     },
