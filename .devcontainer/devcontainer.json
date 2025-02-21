@@ -1,11 +1,12 @@
 {
     "name": "Test Generator Development",
     "image": "mcr.microsoft.com/devcontainers/universal:latest",
-    "hostRequirements": {
-        "memory": "16gb"  // Ensure enough memory for CodeLlama
-    },
     "features": {
-        "docker-in-docker": "latest"
+        "ghcr.io/devcontainers/features/docker-in-docker:2": {
+            "version": "latest",
+            "enableNonRootDocker": "true",
+            "moby": true
+        }
     },
     "customizations": {
         "vscode": {
@@ -14,6 +15,32 @@
             ]
         }
     },
-    "postCreateCommand": "docker rm -f ollama 2>/dev/null || true && docker run -d -v ollama:/root/.ollama -p 11434:11434 --name ollama ollama/ollama && sleep 10 && docker exec -it ollama ollama pull codellama",
-    "postStartCommand": "docker start ollama || (docker rm -f ollama 2>/dev/null && docker run -d -v ollama:/root/.ollama -p 11434:11434 --name ollama ollama/ollama)"
+    "initializeCommand": "docker volume create ollama || true",
+    "onCreateCommand": "echo 'Setting up Ollama...'",
+    "updateContentCommand": "docker pull ollama/ollama",
+    "postCreateCommand": [
+        "docker rm -f ollama || true",
+        "docker run -d --name ollama -v ollama:/root/.ollama -p 11434:11434 --restart unless-stopped ollama/ollama",
+        "sleep 15",
+        "until docker exec ollama ollama list 2>/dev/null; do echo 'Waiting for Ollama to start...' && sleep 5; done",
+        "docker exec ollama ollama pull gemma:2b"
+    ],
+    "postStartCommand": {
+        "ollama": "docker start ollama || (docker rm -f ollama && docker run -d --name ollama -v ollama:/root/.ollama -p 11434:11434 --restart unless-stopped ollama/ollama)"
+    },
+    "postAttachCommand": {
+        "verify": "docker exec ollama ollama list || (echo 'Restarting Ollama...' && docker start ollama)"
+    },
+    "remoteUser": "codespace",
+    "hostRequirements": {
+        "memory": "16gb"
+    },
+    "runArgs": ["--init"],
+    "overrideCommand": false,
+    "mounts": [
+        "source=ollama,target=/root/.ollama,type=volume"
+    ],
+    "remoteEnv": {
+        "OLLAMA_HOST": "http://localhost:11434"
+    }
 }
