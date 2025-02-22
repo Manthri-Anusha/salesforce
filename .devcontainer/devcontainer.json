@@ -15,9 +15,12 @@
             ]
         }
     },
-    "initializeCommand": "docker volume create ollama || true",
+    "initializeCommand": "dockerd > /dev/null 2>&1 & sleep 5",
     "onCreateCommand": "echo 'Setting up Ollama...'",
-    "updateContentCommand": "docker pull ollama/ollama",
+    "updateContentCommand": [
+        "until docker info >/dev/null 2>&1; do echo 'Waiting for Docker to start...' && sleep 5; done",
+        "docker pull ollama/ollama"
+    ],
     "postCreateCommand": [
         "docker rm -f ollama || true",
         "docker run -d --name ollama -v ollama:/root/.ollama -p 11434:11434 --restart unless-stopped ollama/ollama",
