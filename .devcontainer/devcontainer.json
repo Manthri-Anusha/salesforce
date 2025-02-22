@@ -23,7 +23,8 @@
         "docker run -d --name ollama -v ollama:/root/.ollama -p 11434:11434 --restart unless-stopped ollama/ollama",
         "sleep 15",
         "until docker exec ollama ollama list 2>/dev/null; do echo 'Waiting for Ollama to start...' && sleep 5; done",
-        "docker exec ollama ollama pull gemma:2b"
+        "docker exec ollama ollama pull gemma:2b",
+        "docker exec ollama ollama pull codellama:latest"
     ],
     "postStartCommand": {
         "ollama": "docker start ollama || (docker rm -f ollama && docker run -d --name ollama -v ollama:/root/.ollama -p 11434:11434 --restart unless-stopped ollama/ollama)"
