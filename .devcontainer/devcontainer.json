@@ -11,39 +11,34 @@
     "customizations": {
         "vscode": {
             "extensions": [
-                "/workspaces/salesforce/.devcontainer/testcase-generator-1.0.0.vsix"
+                "ms-azuretools.vscode-docker"
             ]
         }
     },
-    "initializeCommand": "dockerd > /dev/null 2>&1 & sleep 5",
-    "onCreateCommand": "echo 'Setting up Ollama...'",
+    "onCreateCommand": "echo 'Starting container setup...'",
     "updateContentCommand": [
-        "until docker info >/dev/null 2>&1; do echo 'Waiting for Docker to start...' && sleep 5; done",
-        "docker pull ollama/ollama"
+        "curl -fsSL https://ollama.com/install.sh | sh",
+        "echo 'Ollama installation completed'"
     ],
-    "postCreateCommand": [
-        "docker rm -f ollama || true",
-        "docker run -d --name ollama -v ollama:/root/.ollama -p 11434:11434 --restart unless-stopped ollama/ollama",
-        "sleep 15",
-        "until docker exec ollama ollama list 2>/dev/null; do echo 'Waiting for Ollama to start...' && sleep 5; done",
-        "docker exec ollama ollama pull gemma:2b",
-        "docker exec ollama ollama pull codellama:latest"
-    ],
-    "postStartCommand": {
-        "ollama": "docker start ollama || (docker rm -f ollama && docker run -d --name ollama -v ollama:/root/.ollama -p 11434:11434 --restart unless-stopped ollama/ollama)"
+    "postCreateCommand": {
+        "start-ollama": "ollama serve &",
+        "wait-ollama": "sleep 10",
+        "pull-models": [
+            "ollama pull gemma:2b",
+            "ollama pull codellama:latest"
+        ]
     },
-    "postAttachCommand": {
-        "verify": "docker exec ollama ollama list || (echo 'Restarting Ollama...' && docker start ollama)"
+    "postStartCommand": {
+        "ensure-ollama": "pgrep ollama || ollama serve &",
+        "verify-models": [
+            "ollama list"
+        ]
     },
     "remoteUser": "codespace",
     "hostRequirements": {
-        "memory": "16gb"
+        "memory": "8gb",
+        "cpus": 4
     },
-    "runArgs": ["--init"],
-    "overrideCommand": false,
-    "mounts": [
-        "source=ollama,target=/root/.ollama,type=volume"
-    ],
     "remoteEnv": {
         "OLLAMA_HOST": "http://localhost:11434"
     }
