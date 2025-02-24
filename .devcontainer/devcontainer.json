@@ -11,7 +11,8 @@
     "customizations": {
         "vscode": {
             "extensions": [
-                "ms-azuretools.vscode-docker"
+                "ms-azuretools.vscode-docker",
+                  "/workspaces/salesforce/.devcontainer/testcase-generator-1.0.0.vsix"
             ]
         }
     },
